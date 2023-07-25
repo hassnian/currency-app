@@ -1,47 +1,52 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div>
+    <div class="h-[5vh] flex justify-center ">
+      <h1>Currency App</h1>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <!-- <button class="btn btn-primary" @click="getLatestExchangeRate">Get</button> -->
     </div>
-  </header>
 
-  <main>
-    <TheWelcome />
-  </main>
+    <div class="h-[90vh] overflow-y-auto">
+      <CoinList :fromNumber="coinsStore.fromNumber" :coins="coinsStore.coins" :rates="coinsStore.exchangeRate"
+        @select="handleSelectCoin" :selectedCoin="coinsStore.activeCoin" />
+
+    </div>
+
+
+    <div class="h-[5vh] flex justify-center">
+      <h2 class="text-center text-xs">Last updated time : {{ new Date(coinsStore.lastUpdateTime) }}</h2>
+    </div>
+
+  </div>
 </template>
+<script setup lang="ts">
+import CoinList from './components/CoinList.vue';
+import { useCoinsStore } from './stores/coins';
 
-<style scoped>
-header {
-  line-height: 1.5;
+const coinsStore = useCoinsStore();
+
+
+function getLatestExchangeRate() {
+  coinsStore.getLatestExchangeRate()
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+function handleSelectCoin(coinCode: string) {
+  coinsStore.activeCoin = coinCode
+  coinsStore.fromNumber = 1
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+getLatestExchangeRate()
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+window.addEventListener('keyup', (e) => {
+  const isNumber = !isNaN(Number(e.key))
+  const key = e.key
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+
+  if (key === 'Backspace') {
+    coinsStore.fromNumber = 0
+  } else if (isNumber) {
+    coinsStore.fromNumber = Number(`${coinsStore.fromNumber}${key}`)
   }
-}
-</style>
+})
+
+</script>
